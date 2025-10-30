@@ -18,14 +18,12 @@ namespace LilinsAdditions.CustomRoles
         public override Version Version => new Version(0, 1);
         public override PluginPriority Priority => PluginPriority.Lowest;
         public static LilinsAdditionsCR Instance;
-        public static CustomRoleHandlers CustomRoleHandlers;
         public static PlayerHandlers PlayerHandlers;
         public Dictionary<StartTeam, List<ICustomRole>> Roles { get; } = new();
 
         public override void OnEnabled()
         {
             Instance = this;
-            CustomRoleHandlers = new CustomRoleHandlers();
             PlayerHandlers = new PlayerHandlers();
 
             RegisterPlayerHandlers();
@@ -33,8 +31,10 @@ namespace LilinsAdditions.CustomRoles
 
             HashSet<CustomRole> existingRoles = new HashSet<CustomRole>(CustomRole.Registered);
             HashSet<CustomAbility> existingAbilities = new HashSet<CustomAbility>(CustomAbility.Registered);
-            CustomRoleHandlers.RegisterRoles();
-
+            Config.riotOperator.Register();
+            Config.kamikazeZombie.Register();
+            Config.luckyMan.Register();
+            Config.thief.Register();
             foreach (CustomRole role in CustomRole.Registered)
             {
                 if (role.CustomAbilities is not null)
@@ -66,12 +66,12 @@ namespace LilinsAdditions.CustomRoles
                         _ => StartTeam.Other
                     };
 
-                    if (!Instance.Roles.ContainsKey(team))
-                        Instance.Roles.Add(team, new());
+                    if (!VVUP.CustomRoles.Plugin.Instance.Roles.ContainsKey(team))
+                        VVUP.CustomRoles.Plugin.Instance.Roles.Add(team, new());
 
                     for (int i = 0; i < role.SpawnProperties.Limit; i++)
-                        Instance.Roles[team].Add(custom);
-                    Log.Debug($"LA CR: Roles {team} now has {Instance.Roles[team].Count} elements.");
+                        VVUP.CustomRoles.Plugin.Instance.Roles[team].Add(custom);
+                    Log.Debug($"LA CR: Roles {team} now has {VVUP.CustomRoles.Plugin.Instance.Roles[team].Count} elements.");
                 }
             }
 
@@ -82,7 +82,7 @@ namespace LilinsAdditions.CustomRoles
 
         public override void OnDisabled()
         {
-            CustomRoleHandlers.UnregisterRoles();
+            CustomRole.UnregisterRoles();
             UnregisterPlayerHandlers();
 
             CustomRoleHandlers = null;
